@@ -1,4 +1,5 @@
 import Orbit from 'orbit/main';
+import { uuid } from 'orbit/lib/uuid';
 import Schema from 'orbit-common/schema';
 import MemorySource from 'orbit-common/memory-source';
 import { Promise } from 'rsvp';
@@ -14,6 +15,12 @@ module("Integration - MemorySource Sync without Connector", {
 
     // Create schema
     var schema = new Schema({
+      modelDefaults: {
+        keys: {
+          '__id': {primaryKey: true, defaultValue: uuid},
+          'id': {}
+        }
+      },
       models: {
         planet: {}
       }
@@ -23,7 +30,9 @@ module("Integration - MemorySource Sync without Connector", {
     primarySource = new MemorySource(schema);
     backupSource = new MemorySource(schema);
 
-    primarySource.on('didTransform',  backupSource.transform);
+    primarySource.on('didTransform', function(operation, inverses) {
+      backupSource.transform(operation);
+    });
   },
 
   teardown: function() {
@@ -74,7 +83,8 @@ test("updates to records in the primary source should be automatically copied to
   primarySource.add('planet', {name: 'Jupiter', classification: 'gas giant'}).then(function(planet) {
     originalPlanet = planet;
 
-    primarySource.update('planet', {__id: planet.__id, name: 'Earth', classification: 'terrestrial'}).then(function(updatedPlanet) {
+    primarySource.update('planet', {__id: planet.__id, name: 'Earth', classification: 'terrestrial'}).then(function() {
+      var updatedPlanet = primarySource.retrieve(['planet', planet.__id]);
       equal(updatedPlanet.__id, planet.__id, 'primary id remains the same');
       equal(updatedPlanet.name, 'Earth', 'name has been updated');
       equal(updatedPlanet.classification, 'terrestrial', 'classification has been updated');

@@ -1,4 +1,4 @@
-import { Class, clone, defineClass, expose, extend, extendClass, isArray, isNone } from 'orbit/lib/objects';
+import { Class, clone, defineClass, expose, extend, extendClass, isArray, isObject, isNone, merge } from 'orbit/lib/objects';
 
 module("Orbit - Lib - Object", {
 });
@@ -66,6 +66,7 @@ test("`expose` can expose specific properties and methods from one object on ano
 });
 
 test("`extend` can copy all the properties and methods from one object to another", function() {
+  expect(5);
   var blank = {
     age: 0
   };
@@ -78,8 +79,9 @@ test("`extend` can copy all the properties and methods from one object to anothe
     }
   };
 
-  extend(blank, earth);
+  var result = extend(blank, earth);
 
+  equal(result, blank, 'extend() returns the destination object');
   equal(blank.name, earth.name, 'name matches');
   equal(blank.age, earth.age, 'age matches');
   equal(blank.greeting(), earth.greeting(), 'greeting matches');
@@ -179,11 +181,22 @@ test("`extendClass` makes _super accessible within overridden methods", function
     name: 'TBD',
     greeting: function() {
       return 'hello from ' + this.name;
+    },
+    abc: function() {
+      return 'a';
     }
   });
+
   extendClass(Planet.prototype, {
     greeting: function() {
       return this._super() + '!';
+    },
+    abc: function() {
+      if (this._super) {
+        return 'b';
+      } else {
+        return 'c';
+      }
     }
   }, {
     isPlanet: true
@@ -192,6 +205,8 @@ test("`extendClass` makes _super accessible within overridden methods", function
   var earth = new Planet();
   equal(earth.name, 'TBD', 'property comes from superclass');
   equal(earth.greeting(), 'hello from TBD!', 'functions can access _super');
+  equal(earth.abc(), 'b', 'functions are wrapped and have _super injected');
+  equal(earth.abc.wrappedFunction(), 'c', 'wrapped functions are still accessible');
   equal(earth.isPlanet, true, 'property comes from mixin');
 
   earth.name = 'earth';
@@ -247,8 +262,26 @@ test("`isArray` checks whether an object is an array", function() {
   equal(isArray(arr), true, 'Array can be identified');
 });
 
+test("`isObject` checks whether a value is a non-null object", function() {
+  equal(isObject(null), false, 'null is not an object');
+  equal(isObject(9), false, 'Number is not an object');
+  equal(isObject({}), true, 'Object is identified correctly');
+  equal(isObject([]), true, 'Array is an object');
+});
+
 test("`isNone` checks whether an object is `null` or `undefined`", function() {
   equal(isNone({}), false, 'Object is not null or undefined');
   equal(isNone(null), true, 'isNone identifies null');
   equal(isNone(undefined), true, 'isNone identifies undefined');
+});
+
+test("`merge` combines two objects", function() {
+  var a = { firstNames: 'Bob', underling: false },
+      b = { lastName: 'Dobbs', 'title': 'Mr.', underlings: null },
+      expected = { title: 'Mr.', firstNames: 'Bob',
+                   lastName: 'Dobbs', underling: false, underlings: null };
+
+  deepEqual(merge(a, b), expected, 'Object values are not merged');
+  deepEqual(a, { firstNames: 'Bob', underling: false },
+            'Original object mutated');
 });

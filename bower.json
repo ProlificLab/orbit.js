@@ -1,9 +1,11 @@
 {
   "name": "orbit.js",
+  "version": "0.6.9",
   "private": true,
-  "dependencies": {
-    "jquery": "~1.9.1",
-    "qunit": "~1.12.0",
-    "rsvp": "~2.0.4"
+  "devDependencies": {
+    "jquery": "~1.11.1",
+    "qunit": "~1.17.1",
+    "rsvp": "~3.0.16",
+    "loader": "stefanpenner/loader.js#1.0.1"
   }
 }

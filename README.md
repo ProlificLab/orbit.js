@@ -45,15 +45,15 @@ Orbit can be installed with [Bower](http://bower.io):
 bower install orbit.js
 ```
 
-[A separate shim repo](https://github.com/orbitjs/bower-orbit) is maintained for
-Bower releases.
+[A separate shim repo](https://github.com/orbitjs/orbit-builds) is
+maintained for builds.
 
 ## Configuration
 
 You'll need to configure Orbit to recognize any applicable dependencies.
 
 Configure your promise library's `Promise` constructor as follows:
- 
+
 ```javascript
 Orbit.Promise = RSVP.Promise;
 ```
@@ -66,41 +66,6 @@ Orbit.ajax = jQuery.ajax;
 ```
 
 Other sources may have other configuration requirements.
-
-## Building and Testing Orbit
-
-The Orbit project is managed by [Grunt](http://gruntjs.com/). Once you've
-installed Grunt and its dependencies, you can install Orbit's development
-dependencies from inside the project root with:
-
-```
-npm install
-```
-
-Distributable versions of Orbit can be built to the `/dist` directory by running:
-
-```
-grunt package
-```
-
-Orbit can be tested by running:
-
-```
-grunt test:ci
-```
-
-Or from within a browser
-(at [http://localhost:8000/test/](http://localhost:8000/test/)) by running:
-
-```
-grunt server
-```
-
-Orbit's docs can be generated to the `/docs` directory by running:
-
-```
-grunt docs
-```
 
 ## How does Orbit work?
 
@@ -138,7 +103,9 @@ collection of compatible sources.
 
   // Create data sources with a common schema
   var schema = new OC.Schema({
-    idField: '__id',
+    keys: {
+      __id: { primaryKey: true, defaultValue: Orbit.uuid }
+    },
     models: {
       planet: {
         attributes: {
@@ -559,6 +526,76 @@ source.on('question', function(question) {
 });
 
 source.poll('question', 'favorite food?'); // returns ['beer', 'wasabi almonds']
+```
+
+## Contributing
+
+### Installing Orbit
+
+Install the CLI for [Broccoli](https://github.com/broccolijs/broccoli) globally:
+
+```
+npm install -g broccoli-cli
+```
+
+Install the rest of Orbit's dependencies:
+
+```
+npm install
+```
+
+### Building Orbit
+
+Distributable versions of Orbit can be built to the `/build` directory by
+running:
+
+```
+npm run build
+```
+
+### Testing Orbit
+
+#### CI Testing
+
+Orbit can be tested in CI mode by running:
+
+```
+npm test
+```
+
+Or directly with testem (useful for configuring options):
+
+```
+testem ci
+```
+
+#### Browser Testing
+
+Orbit can be tested within a browser
+(at [http://localhost:4200/tests/](http://localhost:4200/tests/)) by running:
+
+```
+npm start
+```
+
+Or directly with `broccoli` (useful for configuring the port, etc.):
+
+```
+broccoli serve
+```
+
+### Generating Documentation
+
+Install [yuidoc](http://yui.github.io/yuidoc/) globally:
+
+```
+npm install -g yuidocjs
+```
+
+Generate docs in the `/docs` directory:
+
+```
+yuidoc .
 ```
 
 ## License
